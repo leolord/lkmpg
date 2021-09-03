@@ -463,6 +463,8 @@ What happens?
 \end{quote}
 \end{enumerate}
 
+TODO
+
 \subsection{Hello and Goodbye}
 \label{hello_n_goodbye}
 In early kernel versions you had to use the \cpp|init_module| and \cpp|cleanup_module| functions, as in the first hello world example, but these days you can name those anything you want by using the \cpp|module_init| and \cpp|module_exit| macros.
@@ -470,9 +472,15 @@ These macros are defined in \src{include/linux/init.h}.
 The only requirement is that your init and cleanup functions must be defined before calling the those macros, otherwise you'll get compilation errors.
 Here is an example of this technique:
 
+在早期的内核版本，你必须使用 \cpp|init_module| 和 \cpp|cleanup_module| 方法，就像在第一个 hello world 例子里面一样。 不过，在最近你可以使用 \cpp|module_init| 和 \cpp|module_exit| 宏来指定任意名字了。
+这些宏在 \src{include/linux/init.h} 里面。
+唯一的要求是，模块的初始化和清理方法，必须在调用这些宏之前定义，否则你会遇到编译错误。
+下面是一个例子：
+
 \samplec{examples/hello-2.c}
 
 So now we have two real kernel modules under our belt. Adding another module is as simple as this:
+之前，我们拥有了两个货真价实的内核模块。 再添加一个，就像下面这样简单。
 
 \begin{code}
 obj-m += hello-1.o
@@ -491,10 +499,18 @@ Those familiar with shell scripts will easily be able to spot them.
 For those not, the \verb|obj-$(CONFIG_FOO)| entries you see everywhere expand into \verb|obj-y| or \verb|obj-m|, depending on whether the \verb|CONFIG_FOO| variable has been set to \verb|y| or \verb|m|.
 While we are at it, those were exactly the kind of variables that you have set in the \verb|.config| file in the top-level directory of Linux kernel source tree, the last time when you said \sh|make menuconfig| or something like that.
 
-\subsection{The \_\_init and \_\_exit Macros}
+现在，看一眼 \src{drivers/char/Makefile} 这个真实世界的例子。
+你可以看到，一些东西连接进了内核（\verb|obj-y|），但是那些 \verb|obj-m| 去哪儿了？
+Shell 脚本老手们可以很容易搞清楚。
+实际上，\verb|obj-$(CONFIG_FOO)| 会被展开成 \verb|obj-y| 或者 \verb|obj-m|，这取决于 \verb|CONFIG_FOO|被设置成了 \verb|obj-y| 还是 \verb|obj-m|。
+当我们在做的时候，这些变量和在Linux内核源代码树根目录中的 \verb|.config| 设置的变量一模一样。 最后，通过 \sh|make menuconfig| 或者类似命令看到这些变量。
+
+\subsection{\_\_init 和 \_\_exit 宏}
 \label{init_n_exit}
 The \cpp|__init| macro causes the init function to be discarded and its memory freed once the init function finishes for built-in drivers, but not loadable modules.
 If you think about when the init function is invoked, this makes perfect sense.
+
+TODO
 
 There is also an \cpp|__initdata| which works similarly to \cpp|__init| but for init variables rather than functions.
 
