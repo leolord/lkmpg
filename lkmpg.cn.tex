@@ -85,8 +85,8 @@ This will allow for the merging of updates and provide consistent revisions to t
 If you publish or distribute this book commercially, donations, royalties, and/or printed copies are greatly appreciated by the author and the \href{https://tldp.org/}{Linux Documentation Project} (LDP).
 Contributing in this way shows your support for free software and the LDP. If you have questions or comments, please contact the address above.
 
-TODO:
-如果你以商业目的发布或者分发这本书。
+作者会感激你出于商业、捐赠、获取版税等目的出版和发布这本书和\href{https://tldp.org/}{Linux文档工程} (LDP) 。
+这展示了你对于自由软件和LDP的支持。 如果你有任何疑问或者评价，请联系上面的邮件地址。
 
 \subsection{作者}
 \label{sec:authorship}
@@ -463,8 +463,6 @@ What happens?
 \end{quote}
 \end{enumerate}
 
-TODO
-
 \subsection{Hello and Goodbye}
 \label{hello_n_goodbye}
 In early kernel versions you had to use the \cpp|init_module| and \cpp|cleanup_module| functions, as in the first hello world example, but these days you can name those anything you want by using the \cpp|module_init| and \cpp|module_exit| macros.
@@ -654,11 +652,15 @@ hello-5.o: invalid argument syntax for mylong: 'h'
 
 TODO
 Sometimes it makes sense to divide a kernel module between several source files.
+有些情况下，需要将内核模块拆分到多个源码文件中。
 
 Here is an example of such a kernel module.
+下面是一个例子。
+
 \samplec{examples/start.c}
 
 The next file:
+另一个文件：
 \samplec{examples/stop.c}
 
 And finally, the makefile:
@@ -683,33 +685,56 @@ This is the complete makefile for all the examples we have seen so far.
 The first five lines are nothing special, but for the last example we will need two lines.
 First we invent an object name for our combined module, second we tell \sh|make| what object files are part of that module.
 
-\subsection{Building modules for a precompiled kernel}
-\label{precompiled}
+这个完整的makefile文件包含了目前为止我们用到的所有示例代码。
+最前面的5行没什么特殊的，我们现在需要关注的是最后两行。
+首先，我们给多个源码组合而成的对象起一个名字。 之后，我们告诉 \sh{make} 工具内核文件包含哪些对象。
+
+\subsection{为预编译的内核构建内核模块}
+\label{预编译的}
 Obviously, we strongly suggest you to recompile your kernel, so that you can enable a number of useful debugging features, such as forced module unloading (\cpp|MODULE_FORCE_UNLOAD|): when this option is enabled, you can force the kernel to unload a module even when it believes it is unsafe, via a \sh|sudo rmmod -f module| command.
 This option can save you a lot of time and a number of reboots during the development of a module.
 If you do not want to recompile your kernel then you should consider running the examples within a test distribution on a virtual machine.
 If you mess anything up then you can easily reboot or restore the virtual machine (VM).
 
+显而易见得，我们推荐你手动编译你的内核，这样你就可以开启很多有用的调试特性， 例如： 强制内核模块卸载 (\cpp|MODULE_FORCE_UNLOAD|) —— 这个选项开启的话，你可以通过 \sh|sudo rmmod -f module| 命令强制卸载内核模块，即便这样做不安全。
+这个选项可以节省你很多时间，可以避免在模块开发过程中频繁重启系统。
+如果你想重新编译内核，你应该考虑在虚拟机中运行一个测试版的系统，再执行本书中的例子。
+万一你把内核搞的一团糟，直接恢复下虚拟机的快照就可以。
+
 There are a number of cases in which you may want to load your module into a precompiled running kernel, such as the ones shipped with common Linux distributions, or a kernel you have compiled in the past.
 In certain circumstances you could require to compile and insert a module into a running kernel which you are not allowed to recompile, or on a machine that you prefer not to reboot.
 If you can't think of a case that will force you to use modules for a precompiled kernel you might want to skip this and treat the rest of this chapter as a big footnote.
 
+很多时候，你可能需要往一个预编译好的运行中的内核——例如常见的Linux分发版，或者你过去编译的内核——中加载你的模块。
+一些特定情况下，你想要编译并插入你的模块到一个运行中的内核中，而这台机器你不想重启。
+要是你想不到强制你在预编译的内核里使用你的模块的例子，可以跳过和忽略这章剩下的部分，就当是一个长一点的脚注吧。
+
 Now, if you just install a kernel source tree, use it to compile your kernel module and you try to insert your module into the kernel, in most cases you would obtain an error as follows:
+现在，如果你刚准备好了内核代码，用这份代码来编译内核，然后尝试插入你的模块到这个内核中，大多数情况下你会遇到下面这个错误：
 
 \begin{verbatim}
 insmod: ERROR: could not insert module poet.ko: Invalid module format
+insmod: ERROR: 无法插入模块 poet.ko: 非法的模块格式
 \end{verbatim}
 
 Less cryptic information is logged to the systemd journal:
 
+systemd日志中会记录少量含糊的信息：
+
 \begin{verbatim}
 kernel: poet: disagrees about version of symbol module_layout
+kernel: poet: 不支持的符号模块布局版本。
 \end{verbatim}
 
 In other words, your kernel refuses to accept your module because version strings (more precisely, \textit{version magic}, see \src{include/linux/vermagic.h}) do not match.
 Incidentally, version magic strings are stored in the module object in the form of a static string, starting with \cpp|vermagic:|.
 Version data are inserted in your module when it is linked against the \verb|kernel/module.o| file.
 To inspect version magics and other strings stored in a given module, issue the command \sh|modinfo module.ko|:
+
+换句话说，内核拒绝了你的模块，因为版本号字符串（准确地说，\textit{版本魔法}，见\src{include/linux/vermagic.h}）不匹配。
+顺便说一句，版本魔法字符串会以静态字符串的形式存储在模块对象中， 以 \cpp|vermagic:| 开头。
+版本数据会在链接到\verb|kernel/module.o|文件的时候插入到你的模块中。
+想要查看一个模块中的版本魔法和其他字符串， 你可是使用 \sh|modinfo module.ko| 命令:
 
 \begin{verbatim}
 $ modinfo hello-4.ko
@@ -722,6 +747,8 @@ retpoline:      Y
 name:           hello_4
 vermagic:       5.4.0-70-generic SMP mod_unload modversions
 \end{verbatim}
+
+TODO
 
 To overcome this problem we could resort to the \verb|--force-vermagic| option, but this solution is potentially unsafe, and unquestionably unacceptable in production modules.
 Consequently, we want to compile our module in an environment which was identical to the one in which our precompiled kernel was built.
